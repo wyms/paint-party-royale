@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Splat Royale</title>
+<title>Paint Party Royale</title>
 <meta name="description" content="A kid-friendly paint-blaster battle royale you can play in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -123,8 +123,8 @@
 
 <div id="menu" class="overlay">
   <div class="card">
-    <h1 class="logo">SPLAT<span>ROYALE</span></h1>
-    <p class="tagline">Glide in, build fast, and splat everyone with paint.<br>Last one standing wins the Victory Splash!</p>
+    <h1 class="logo">PAINT<span>PARTY</span></h1>
+    <p class="tagline">Glide in, build fast, and blast everyone with paint.<br>Last one standing wins the Victory Splash!</p>
     <h2>Pick your color</h2>
     <div class="row" id="colors"></div>
     <h2>Bot difficulty</h2>
@@ -137,7 +137,7 @@
     <div class="keys">
       <div><kbd>WASD</kbd>Move</div>
       <div><kbd>Mouse</kbd>Look / aim</div>
-      <div><kbd>Click</kbd>Splat / build</div>
+      <div><kbd>Click</kbd>Blast / build</div>
       <div><kbd>R-Click</kbd>Zoom aim</div>
       <div><kbd>Space</kbd>Jump</div>
       <div><kbd>Shift</kbd>Sprint</div>
@@ -191,9 +191,9 @@ const DIFFS = {
   sweaty: { aim: 0.04,  sight: 60, react: 0.6, dmg: 1.0,  build: 0.55 },
 };
 const OUTFITS = ['#3a86ff', '#ff5fa2', '#ffbe0b', '#06d6a0', '#9b5de5', '#ff7b00'];
-let diffKey = store.get('splat-diff', 'normal'); if (!DIFFS[diffKey]) diffKey = 'normal';
-let outfit = store.get('splat-color', OUTFITS[0]); if (!OUTFITS.includes(outfit)) outfit = OUTFITS[0];
-let sens = +store.get('splat-sens', '5') || 5;
+let diffKey = store.get('pp-diff', 'normal'); if (!DIFFS[diffKey]) diffKey = 'normal';
+let outfit = store.get('pp-color', OUTFITS[0]); if (!OUTFITS.includes(outfit)) outfit = OUTFITS[0];
+let sens = +store.get('pp-sens', '5') || 5;
 let diff = DIFFS[diffKey];
 
 // ---------- Renderer / scene ----------
@@ -278,7 +278,7 @@ for (let i = 0; i < 26; i++) {
 // Houses (with a chest inside)
 const HOUSE_COLORS = [0xffd166, 0xef8fb5, 0x8ecae6, 0xb8e986, 0xf4a261, 0xcdb4db];
 function makeHouse(x, z, w, d) {
-  const c = pick(HOUSE_COLORS), rc = pick([0xd62828, 0x3a86ff, 0x6a4c93, 0x2a9d8f]), t = 0.4, h = 4, f = Math.random() < 0.5 ? 1 : -1, S = { splat: true };
+  const c = pick(HOUSE_COLORS), rc = pick([0xd62828, 0x3a86ff, 0x6a4c93, 0x2a9d8f]), t = 0.4, h = 4, f = Math.random() < 0.5 ? 1 : -1, S = { drip: true };
   box(w, h, t, c, x, 0, z - f * (d / 2 - t / 2), S);
   box(t, h, d - 2 * t, c, x - w / 2 + t / 2, 0, z, S);
   box(t, h, d - 2 * t, c, x + w / 2 - t / 2, 0, z, S);
@@ -358,19 +358,19 @@ function updateBeams(dt) {
   }
 }
 
-// ---------- Paint splats ----------
-const splatGeo = new THREE.CircleGeometry(1, 14);
-const splatMats = new Map();
-function splatMat(c) {
-  if (!splatMats.has(c)) splatMats.set(c, new THREE.MeshLambertMaterial({ color: c, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
-  return splatMats.get(c);
+// ---------- Paint drips ----------
+const dripGeo = new THREE.CircleGeometry(1, 14);
+const dripMats = new Map();
+function dripMat(c) {
+  if (!dripMats.has(c)) dripMats.set(c, new THREE.MeshLambertMaterial({ color: c, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
+  return dripMats.get(c);
 }
-const splats = [], _tv = new V3();
-function splat(point, normal, color, parent = null) {
-  const m = new THREE.Mesh(splatGeo, splatMat(color)); m.scale.setScalar(rand(0.35, 0.75));
+const drips = [], _tv = new V3();
+function drip(point, normal, color, parent = null) {
+  const m = new THREE.Mesh(dripGeo, dripMat(color)); m.scale.setScalar(rand(0.35, 0.75));
   m.position.copy(point).addScaledVector(normal, 0.03); m.lookAt(_tv.copy(m.position).add(normal)); m.rotateZ(rand(0, 6.28));
   scene.add(m); if (parent) parent.attach(m);
-  splats.push(m); if (splats.length > 280) splats.shift().removeFromParent();
+  drips.push(m); if (drips.length > 280) drips.shift().removeFromParent();
 }
 function boxFace(s, q) {
   const d = [q.x - s.min.x, s.max.x - q.x, q.y - s.min.y, s.max.y - q.y, q.z - s.min.z, s.max.z - q.z];
@@ -383,9 +383,9 @@ function boxFace(s, q) {
 // ---------- Loot ----------
 const WEAPONS = {
   foam:  { key: 'foam',  rank: 0, name: 'Foam Blaster',   rarity: 'Common',    color: '#8fe35d', dmg: 14, rate: 0.28, mag: 16, reload: 1.3, speed: 95,  spread: 0.012, pellets: 1, auto: true },
-  rapid: { key: 'rapid', rank: 1, name: 'Rapid Splatter', rarity: 'Rare',      color: '#4aa8ff', dmg: 9,  rate: 0.09, mag: 30, reload: 1.6, speed: 100, spread: 0.03,  pellets: 1, auto: true },
-  burst: { key: 'burst', rank: 2, name: 'Splat Burst',    rarity: 'Epic',      color: '#c070ff', dmg: 10, rate: 0.85, mag: 5,  reload: 1.8, speed: 80,  spread: 0.07,  pellets: 6, auto: false },
-  long:  { key: 'long',  rank: 3, name: 'Long Splatter',  rarity: 'Legendary', color: '#ffb627', dmg: 48, rate: 1.2,  mag: 3,  reload: 2.2, speed: 180, spread: 0,     pellets: 1, auto: false },
+  rapid: { key: 'rapid', rank: 1, name: 'Rapid Sprayer', rarity: 'Rare',      color: '#4aa8ff', dmg: 9,  rate: 0.09, mag: 30, reload: 1.6, speed: 100, spread: 0.03,  pellets: 1, auto: true },
+  burst: { key: 'burst', rank: 2, name: 'Paint Burst',    rarity: 'Epic',      color: '#c070ff', dmg: 10, rate: 0.85, mag: 5,  reload: 1.8, speed: 80,  spread: 0.07,  pellets: 6, auto: false },
+  long:  { key: 'long',  rank: 3, name: 'Long Sprayer',  rarity: 'Legendary', color: '#ffb627', dmg: 48, rate: 1.2,  mag: 3,  reload: 2.2, speed: 180, spread: 0,     pellets: 1, auto: false },
 };
 function rollWeapon() { const r = Math.random(); return r < 0.15 ? WEAPONS.foam : r < 0.55 ? WEAPONS.rapid : r < 0.85 ? WEAPONS.burst : WEAPONS.long; }
 const pickups = [];
@@ -540,9 +540,9 @@ for (let tries = 0; world.houses.length < 12 && tries < 400; tries++) {
 }
 for (let i = 0; i < 26; i++) {
   const x = rand(-180, 180), z = rand(-180, 180); if (nearHouse(x, z, 6)) continue;
-  box(2, 2, 2, 0xb5835a, x, 0, z, { splat: true });
-  if (Math.random() < 0.5) box(2, 2, 2, 0xa0714a, x + 2.1, 0, z + rand(-0.4, 0.4), { splat: true });
-  if (Math.random() < 0.3) box(2, 2, 2, 0xc29062, x + 1, 2, z, { splat: true });
+  box(2, 2, 2, 0xb5835a, x, 0, z, { drip: true });
+  if (Math.random() < 0.5) box(2, 2, 2, 0xa0714a, x + 2.1, 0, z + rand(-0.4, 0.4), { drip: true });
+  if (Math.random() < 0.3) box(2, 2, 2, 0xc29062, x + 1, 2, z, { drip: true });
 }
 for (let i = 0; i < 110; i++) { const x = rand(-190, 190), z = rand(-190, 190); if (!nearHouse(x, z, 4)) makeTree(x, z); }
 for (let i = 0; i < 40; i++) { const x = rand(-190, 190), z = rand(-190, 190); if (!nearHouse(x, z, 4)) makeRock(x, z); }
@@ -583,7 +583,7 @@ function updateStorm(dt) {
 const outsideStorm = p => Math.hypot(p.x - storm.x, p.z - storm.z) > storm.r;
 
 // ---------- Game state ----------
-const BOT_NAMES = ['PixelPanda', 'CaptainNoodle', 'WaffleWizard', 'TurboTaco', 'SirSplatsALot', 'BubbleNinja', 'DinoDash', 'MangoTango',
+const BOT_NAMES = ['PixelPanda', 'CaptainNoodle', 'WaffleWizard', 'TurboTaco', 'SirPaintsALot', 'BubbleNinja', 'DinoDash', 'MangoTango',
   'SnackAttack', 'LlamaLlama', 'ZoomZebra', 'CosmicCupcake', 'FrostyFries', 'JellyJumper', 'NachoNinja', 'GummyGoblin', 'BananaBlitz', 'ToastyGhost', 'SpaceWaffle'];
 const BOT_COLORS = ['#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#f78c6b', '#9b5de5', '#f15bb5', '#00bbf9', '#00f5d4', '#fee440', '#ff006e', '#8338ec', '#fb5607', '#3a86ff', '#80ed99', '#ff99c8', '#a0c4ff', '#caffbf', '#ffadad'];
 let state = 'menu', player = null, bots = [], chars = [], mode = 'blaster', time = 0, gameTime = 0, endTimer = -1, endInfo = null;
@@ -665,11 +665,11 @@ function projHit(pr) {
       const crit = dy > 1.3, botVsBot = !pr.owner.isPlayer && !c.isPlayer; // bots go easier on each other so matches last
       damageChar(c, pr.dmg * (crit ? 1.5 : 1) * (botVsBot ? 0.45 : 1), pr.owner, q, crit); burst(q, pr.color, 8, 4); return true; }
   }
-  if (q.y <= 0) { q.y = 0; splat(q, UP, pr.color); burst(q, pr.color, 5, 3); return true; }
+  if (q.y <= 0) { q.y = 0; drip(q, UP, pr.color); burst(q, pr.color, 5, 3); return true; }
   for (const s of world.solids) {
     if (q.x < s.min.x - 0.05 || q.x > s.max.x + 0.05 || q.y < s.min.y - 0.05 || q.y > s.max.y + 0.05 || q.z < s.min.z - 0.05 || q.z > s.max.z + 0.05) continue;
     burst(q, pr.color, 6, 3);
-    if (s.piece || s.splat) { const f = boxFace(s, q); splat(f.p, f.n, pr.color, s.piece ? s.piece.mesh : null); }
+    if (s.piece || s.drip) { const f = boxFace(s, q); drip(f.p, f.n, pr.color, s.piece ? s.piece.mesh : null); }
     if (s.piece) damagePiece(s.piece, pr.dmg);
     return true;
   }
@@ -732,7 +732,7 @@ function finish(win) {
 function showEnd() {
   state = 'over'; document.exitPointerLock?.();
   const e = endInfo, mm = Math.floor(e.time / 60), ss = String(Math.floor(e.time % 60)).padStart(2, '0');
-  $('overTitle').innerHTML = e.win ? '#1 VICTORY<span>SPLASH!</span>' : e.place <= 5 ? `SO CLOSE!<span>#${e.place}</span>` : `SPLATTED!<span>#${e.place}</span>`;
+  $('overTitle').innerHTML = e.win ? '#1 VICTORY<span>SPLASH!</span>' : e.place <= 5 ? `SO CLOSE!<span>#${e.place}</span>` : `PAINTED!<span>#${e.place}</span>`;
   $('overSub').textContent = e.win ? 'You were the last one standing. Legendary!' : e.place <= 5 ? 'Top 5! One more game?' : 'You got beamed back to the lobby. Try building for cover!';
   $('overStats').innerHTML = [['Place', '#' + e.place], ['Tags', e.tags], ['Survived', `${mm}:${ss}`], ['Built', e.built]]
     .map(([k, v]) => `<div class="stat"><b>${v}</b>${k}</div>`).join('');
@@ -1043,14 +1043,14 @@ $('playBtn').onclick = startGame;
 // Menu: outfit colors, difficulty, sensitivity
 for (const c of OUTFITS) {
   const b = document.createElement('button'); b.className = 'swatch' + (c === outfit ? ' on' : ''); b.style.background = c; b.setAttribute('aria-label', 'Color ' + c);
-  b.onclick = () => { outfit = c; store.set('splat-color', c); document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('on', s === b)); };
+  b.onclick = () => { outfit = c; store.set('pp-color', c); document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('on', s === b)); };
   $('colors').appendChild(b);
 }
 document.querySelectorAll('#diffs .pill').forEach(b => {
   b.classList.toggle('on', b.dataset.d === diffKey);
-  b.onclick = () => { diffKey = b.dataset.d; diff = DIFFS[diffKey]; store.set('splat-diff', diffKey); document.querySelectorAll('#diffs .pill').forEach(x => x.classList.toggle('on', x === b)); };
+  b.onclick = () => { diffKey = b.dataset.d; diff = DIFFS[diffKey]; store.set('pp-diff', diffKey); document.querySelectorAll('#diffs .pill').forEach(x => x.classList.toggle('on', x === b)); };
 });
-$('sens').value = sens; $('sens').oninput = e => { sens = +e.target.value; store.set('splat-sens', sens); };
+$('sens').value = sens; $('sens').oninput = e => { sens = +e.target.value; store.set('pp-sens', sens); };
 
 // ---------- Main loop ----------
 function update(dt) {
