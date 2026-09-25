@@ -4,7 +4,9 @@ A kid-friendly 5v5 paintball game that runs in the browser. You're on the Blue t
 
 **How to win a round:** paint out everyone on the other team, or grab the flag in the middle and hang it at their base. Each player is out after 3 hits (4 on Normal, 5 on Chill). Painted-out players raise their marker and walk off the field. The first team to win 2 rounds wins the match.
 
-**Play:** open `index.html` in a browser (or visit the GitHub Pages site). You'll need a keyboard and mouse.
+**Play:** open `index.html` in a browser (or visit the GitHub Pages site). It works with a keyboard and mouse, or with touch on phones and tablets.
+
+**iPhone / iPad:** open the site in Safari and turn the phone sideways. Use the left thumb to move (push far to sprint), drag anywhere on the right to aim, and hold 🎯 to shoot. For a full-screen app: Share → **Add to Home Screen**.
 
 | Key | Action |
 | --- | --- |

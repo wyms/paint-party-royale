@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Paint Party Royale</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Paint Party">
+<meta name="theme-color" content="#2b1055">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
 <meta name="description" content="A kid-friendly 5v5 paintball game you can play in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,7 +107,44 @@
   .dmg.out { color: #ffe74c; font-size: 34px; }
   @keyframes rise { from { opacity: 1; margin-top: 0; } to { opacity: 0; margin-top: -60px; } }
   @keyframes fadein { from { opacity: 0; transform: translateX(-10px); } }
-  @media (max-width: 760px) { #minimap { width: 90px; height: 145px; } #scorebar .team { font-size: 22px; padding: 4px 8px; } .dots i { width: 8px; height: 8px; } }
+  @media (max-width: 760px), (max-height: 500px) { #minimap { width: 90px; height: 145px; } #scorebar .team { font-size: 22px; padding: 4px 8px; } .dots i { width: 8px; height: 8px; } }
+  button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  body { -webkit-touch-callout: none; }
+
+  /* ---------- Touch controls (phones & tablets) ---------- */
+  #touch { position: fixed; inset: 0; z-index: 15; touch-action: none; -webkit-tap-highlight-color: transparent; }
+  #stick { position: absolute; width: 130px; height: 130px; margin: -65px 0 0 -65px; border-radius: 50%; background: rgba(255,255,255,.12);
+    border: 3px solid rgba(255,255,255,.4); left: calc(110px + env(safe-area-inset-left)); top: calc(100% - 110px); pointer-events: none; opacity: .55; }
+  #stick.active { opacity: 1; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: rgba(255,255,255,.75); }
+  .tbtn { position: absolute; border-radius: 50%; border: 3px solid rgba(255,255,255,.75); background: rgba(30,10,60,.5); color: #fff;
+    font-family: var(--ui); font-size: 14px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.05;
+    padding: 0; user-select: none; -webkit-user-select: none; text-shadow: 0 1px 0 rgba(0,0,0,.5); }
+  .tbtn.down, .tbtn.on { background: rgba(255,231,76,.85); color: #3b1275; text-shadow: none; }
+  .tbtn span { font-size: 24px; display: block; }
+  #tFire { width: 92px; height: 92px; right: calc(26px + env(safe-area-inset-right)); bottom: 62px; background: rgba(255,95,162,.6); font-size: 36px; }
+  #tJump { width: 62px; height: 62px; right: calc(130px + env(safe-area-inset-right)); bottom: 18px; }
+  #tCrouch { width: 62px; height: 62px; right: calc(130px + env(safe-area-inset-right)); bottom: 92px; }
+  #tReload { width: 52px; height: 52px; right: calc(46px + env(safe-area-inset-right)); bottom: 166px; }
+  #tZoom { width: 52px; height: 52px; right: calc(206px + env(safe-area-inset-right)); bottom: 22px; }
+  #tBuild { position: absolute; right: calc(206px + env(safe-area-inset-right)); bottom: 84px; display: flex; flex-direction: column-reverse; gap: 8px; }
+  #tBuild .tbtn { position: static; width: 52px; height: 52px; border-radius: 14px; }
+  #tPause { width: 44px; height: 44px; left: calc(10px + env(safe-area-inset-left)); top: 10px; font-size: 18px; }
+  body.touch #bars { left: calc(62px + env(safe-area-inset-left)); top: 10px; bottom: auto; padding: 6px 10px; }
+  body.touch #pips i { width: 20px; height: 20px; border-width: 2px; }
+  body.touch #hotbar { left: calc(10px + env(safe-area-inset-left)); right: auto; top: 76px; bottom: auto; }
+  body.touch #hotbar .slot[data-m]:not(#wSlot) { display: none; }
+  body.touch #wSlot { min-width: 0; padding: 4px 8px; } body.touch #ammo { font-size: 18px; } body.touch #wName { font-size: 13px; }
+  body.touch #matsBox { font-size: 15px; }
+  body.touch #feed { top: 150px; left: calc(10px + env(safe-area-inset-left)); font-size: 13px; }
+  body.touch #topright { right: calc(10px + env(safe-area-inset-right)); top: 10px; }
+  body.touch #flagText { font-size: 14px; top: 64px; }
+  body.touch #spec, body.touch #hint { bottom: 12px; font-size: 16px; }
+  body.touch #toast { font-size: 20px; }
+  body.touch #crosshair { width: 26px; height: 26px; }
+  #rotate { display: none; z-index: 30; flex-direction: column; font-size: 28px; text-align: center; gap: 12px; background: #2b1055; }
+  #rotate b { font-size: 64px; font-weight: 400; }
+  @media (orientation: portrait) { body.touch.playing #rotate { display: flex; } }
 </style>
 </head>
 <body>
@@ -131,6 +175,22 @@
   </div>
 </div>
 
+<div id="touch" class="hidden">
+  <div id="stick"><div id="knob"></div></div>
+  <button class="tbtn" id="tPause" aria-label="Pause">❚❚</button>
+  <button class="tbtn" id="tFire" aria-label="Shoot">🎯</button>
+  <button class="tbtn" id="tJump"><div><span>⤒</span>JUMP</div></button>
+  <button class="tbtn" id="tCrouch"><div><span>⤓</span>CROUCH</div></button>
+  <button class="tbtn" id="tReload" aria-label="Reload"><span>↻</span></button>
+  <button class="tbtn" id="tZoom" aria-label="Zoom"><span>🔍</span></button>
+  <div id="tBuild">
+    <button class="tbtn" data-k="KeyQ" data-m="wall" aria-label="Wall"><span>🧱</span></button>
+    <button class="tbtn" data-k="KeyE" data-m="ramp" aria-label="Ramp"><span>📐</span></button>
+    <button class="tbtn" data-k="KeyC" data-m="floor" aria-label="Floor"><span>⬛</span></button>
+  </div>
+</div>
+<div id="rotate" class="overlay"><b>📱↻</b>Turn your phone sideways to play</div>
+
 <div id="menu" class="overlay">
   <div class="card">
     <h1 class="logo">PAINT<span>PARTY</span></h1>
@@ -147,7 +207,15 @@
       <button class="pill" data-d="sweaty">🔥 Sweaty<small>3 hits, sharp bots</small></button>
     </div>
     <button class="big" id="playBtn">PLAY</button>
-    <div class="keys">
+    <div class="keys" id="touchKeys" style="display:none">
+      <div>🕹️ Left thumb: move (push far to sprint)</div>
+      <div>👆 Right thumb: drag to aim</div>
+      <div>🎯 Hold to shoot (drag it to aim too)</div>
+      <div>⤓ Crouch · ⤒ Jump · ↻ Reload</div>
+      <div>🧱 📐 ⬛ Build, then 🔨 to place</div>
+      <div>🔍 Zoom · ❚❚ Pause</div>
+    </div>
+    <div class="keys" id="deskKeys">
       <div><kbd>WASD</kbd>Move</div>
       <div><kbd>Mouse</kbd>Look / aim</div>
       <div><kbd>Click</kbd>Shoot / build</div>
@@ -162,7 +230,7 @@
       <div><kbd>Esc</kbd>Pause</div>
     </div>
     <label class="sens">Mouse sensitivity <input type="range" id="sens" min="1" max="10" step="1"></label>
-    <p class="small">Keyboard + mouse needed. Hit players raise their marker and walk off the field — just like real paintball.</p>
+    <p class="small" id="note">Works with keyboard + mouse or a touchscreen (turn your phone sideways). Hit players raise their marker and walk off the field — just like real paintball.</p>
   </div>
 </div>
 
@@ -218,10 +286,13 @@ let markerKey = store.get('pp-marker', 'classic'); if (!MARKERS[markerKey]) mark
 let helmet = store.get('pp-helmet', HELMETS[0]); if (!HELMETS.includes(helmet)) helmet = HELMETS[0];
 let sens = +store.get('pp-sens', '5') || 5;
 let diff = DIFFS[diffKey];
+// Touchscreen phones/tablets get on-screen controls instead of mouse lock
+const TOUCH = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 1 && !matchMedia('(pointer: fine)').matches;
+if (TOUCH) document.body.classList.add('touch');
 
 // ---------- Renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, TOUCH ? 1.5 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -232,7 +303,7 @@ scene.fog = new THREE.Fog(0x8fd3ff, 120, 320);
 const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.1, 1000);
 scene.add(new THREE.HemisphereLight(0xffffff, 0x7a9a5a, 1.1));
 const sun = new THREE.DirectionalLight(0xfff4e0, 1.8);
-sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+sun.castShadow = true; sun.shadow.mapSize.setScalar(TOUCH ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -65, right: 65, top: 65, bottom: -65, near: 1, far: 250 });
 sun.shadow.bias = -0.0005; sun.position.set(40, 90, 25);
 scene.add(sun, sun.target);
@@ -616,8 +687,9 @@ function startMatch() {
   $('pips').innerHTML = '<i></i>'.repeat(player.maxHp);
   state = 'play';
   $('menu').classList.add('hidden'); $('hud').classList.remove('hidden');
+  document.body.classList.add('playing');
   startRound(1);
-  lockPointer();
+  if (TOUCH) { $('touch').classList.remove('hidden'); actx?.resume?.(); } else lockPointer();
 }
 function startRound(n) {
   round = n; roundLeft = ROUND_TIME; roundElapsed = 0; phase = 'countdown'; phaseT = 3; lastCount = 4; mode = 'blaster';
@@ -789,18 +861,31 @@ function playerShoot() {
   aimRay.set(camera.position, _dir); aimRay.far = 200;
   const list = world.hitMeshes.concat(...bots.filter(b => b.alive && b.team !== 0).map(b => b.hitParts));
   const h = aimRay.intersectObjects(list, false).find(h => h.distance > camDistNow + 0.5);
-  const target = h ? h.point : camera.position.clone().addScaledVector(_dir, 120);
+  let target = h ? h.point : camera.position.clone().addScaledVector(_dir, 120);
+  // Touch aim assist: if an enemy is just off the crosshair and visible, nudge the shot onto them
+  if (TOUCH && !(h && bots.some(b => b.hitParts.includes(h.object)))) {
+    let best = null, ba = 0.075;
+    for (const b of bots) {
+      if (!b.alive || b.team === 0) continue;
+      const chest = b.pos.clone(); chest.y += b.crouch ? 0.75 : 1.1;
+      const to = chest.clone().sub(camera.position), d = to.length();
+      if (d > 60 || (h && h.distance < d - 1)) continue;
+      const a = to.divideScalar(d).angleTo(_dir);
+      if (a < ba && hasLOS(p, b)) { ba = a; best = chest; }
+    }
+    if (best) target = best;
+  }
   const origin = muzzle(p);
   return tryFire(p, origin, arcAim(origin, target, p.weapon.speed));
 }
 function updatePlayer(dt, frozen) {
   const p = player; if (!p.alive) return;
   const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw), rx = -fz, rz = fx;
-  let mz = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0), mx = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
-  const len = Math.hypot(mx, mz) || 1; mx /= len; mz /= len;
+  let mz = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0) + touch.move.y, mx = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + touch.move.x;
+  const len = Math.hypot(mx, mz); if (len > 1) { mx /= len; mz /= len; }
   if (frozen) mx = mz = 0;
-  p.crouch = !!keys.KeyX && p.onGround;
-  const sprint = (keys.ShiftLeft || keys.ShiftRight) && mz > 0 && !p.crouch;
+  p.crouch = (!!keys.KeyX || touch.crouch) && p.onGround;
+  const sprint = (keys.ShiftLeft || keys.ShiftRight || Math.hypot(touch.move.x, touch.move.y) > 0.92) && mz > 0.3 && !p.crouch;
   const speed = (p.crouch ? 3.2 : sprint ? 9 : 6.3) * (rightDown ? 0.7 : 1) * (flag.carrier === p ? 0.92 : 1);
   wish.set((fx * mz + rx * mx) * speed, 0, (fz * mz + rz * mx) * speed);
   if ((mx || mz) && p.dance > 0) p.dance = 0;
@@ -1004,6 +1089,7 @@ function endRound(w, reason) {
 function matchOver() { return score[0] >= ROUNDS_TO_WIN || score[1] >= ROUNDS_TO_WIN || round >= MAX_ROUNDS; }
 function showEnd() {
   state = 'over'; document.exitPointerLock?.();
+  $('touch').classList.add('hidden'); document.body.classList.remove('playing'); resetTouch();
   const win = score[0] > score[1], tie = score[0] === score[1];
   $('overTitle').innerHTML = tie ? 'IT\'S A<span>TIE!</span>' : win ? 'BLUE TEAM<span>WINS!</span>' : 'ORANGE<span>WINS!</span>';
   $('overSub').textContent = `Final score ${score[0]} – ${score[1]}. ` + (win ? 'Your team is the Paint Party champion!' : tie ? 'So close! Run it back?' : 'Good try! Use bunkers and crouch for cover.');
@@ -1032,13 +1118,19 @@ function updateHUD(dt) {
   $('roundN').textContent = `ROUND ${round}`;
   const s = Math.max(0, Math.ceil(roundLeft));
   $('timer').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-  if (mode !== lastMode) { lastMode = mode; document.querySelectorAll('.slot').forEach(el => el.classList.toggle('on', el.dataset.m === mode)); }
+  if (mode !== lastMode) {
+    lastMode = mode;
+    document.querySelectorAll('.slot').forEach(el => el.classList.toggle('on', el.dataset.m === mode));
+    document.querySelectorAll('#tBuild .tbtn').forEach(el => el.classList.toggle('on', el.dataset.m === mode));
+    $('tFire').textContent = mode === 'blaster' ? '🎯' : '🔨';
+  }
+  $('tCrouch').classList.toggle('on', touch.crouch); $('tZoom').classList.toggle('on', rightDown);
   const fc = flag.carrier;
   $('flagText').innerHTML = !fc ? (flag.dropped ? '🚩 The flag is loose — grab it!' : '🚩 Flag is in the middle')
     : fc === p ? '🚩 You have the flag! Get to the <b style="color:#ffb36b">orange base</b> ⬆'
     : fc.team === 0 ? `🚩 ${fc.name} has the flag — protect them!` : `⚠️ ${fc.name} has our flag — stop them!`;
   $('crosshair').classList.toggle('hidden', mode !== 'blaster' || !p.alive);
-  const hint = p.alive && phase === 'live' && !p.crouch && roundElapsed < 20 ? 'Hold <kbd>X</kbd> to crouch behind low bunkers' : '';
+  const hint = p.alive && phase === 'live' && !p.crouch && roundElapsed < 20 ? (TOUCH ? 'Tap ⤓ CROUCH to hide behind low bunkers' : 'Hold <kbd>X</kbd> to crouch behind low bunkers') : '';
   $('hint').classList.toggle('hidden', !hint || !$('spec').classList.contains('hidden')); if (hint && $('hint').innerHTML !== hint) $('hint').innerHTML = hint;
   hitV = Math.max(0, hitV - dt * 5); $('hitmarker').style.opacity = hitV;
   hurtV = Math.max(0, hurtV - dt * 1.5); $('hurtV').style.opacity = hurtV;
@@ -1096,7 +1188,80 @@ document.addEventListener('pointerlockchange', () => {
   if (!locked && state === 'play') { state = 'paused'; mouseDown = rightDown = false; $('pause').classList.remove('hidden'); }
   else if (locked && state === 'paused') { state = 'play'; $('pause').classList.add('hidden'); }
 });
-$('resumeBtn').onclick = lockPointer;
+
+// ---------- Touch controls ----------
+// Left side: floating joystick. Anywhere else: drag to aim. The fire button can also be dragged to aim.
+const touch = { move: { x: 0, y: 0 }, stickId: null, ox: 0, oy: 0, look: new Map(), fireIds: new Set(), jumpIds: new Set(), crouch: false };
+const STICK_R = 55;
+function placeStick(x, y) {
+  const s = $('stick');
+  if (x === undefined) { s.style.left = ''; s.style.top = ''; s.classList.remove('active'); }
+  else { s.style.left = x + 'px'; s.style.top = y + 'px'; s.classList.add('active'); }
+  $('knob').style.transform = '';
+}
+function resetTouch() {
+  touch.move.x = touch.move.y = 0; touch.stickId = null; touch.look.clear(); touch.fireIds.clear(); touch.jumpIds.clear();
+  mouseDown = clickQueued = rightDown = false; keys.Space = false; placeStick();
+  document.querySelectorAll('.tbtn.down').forEach(b => b.classList.remove('down'));
+}
+function pauseGame() { if (state !== 'play') return; state = 'paused'; resetTouch(); $('pause').classList.remove('hidden'); }
+function resumeGame() {
+  if (!TOUCH) return lockPointer();
+  if (state === 'paused') { state = 'play'; $('pause').classList.add('hidden'); actx?.resume?.(); }
+}
+const tl = $('touch');
+tl.addEventListener('touchstart', e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    const btn = t.target.closest ? t.target.closest('.tbtn') : null;
+    if (btn) {
+      btn.classList.add('down');
+      if (btn.id === 'tFire') { touch.fireIds.add(t.identifier); mouseDown = true; clickQueued = true; touch.look.set(t.identifier, { x: t.clientX, y: t.clientY }); }
+      else if (btn.id === 'tJump') { touch.jumpIds.add(t.identifier); keys.Space = true; }
+      else if (btn.id === 'tCrouch') touch.crouch = !touch.crouch;
+      else if (btn.id === 'tReload') onKey('KeyR');
+      else if (btn.id === 'tZoom') rightDown = !rightDown;
+      else if (btn.id === 'tPause') pauseGame();
+      else if (btn.dataset.k) onKey(btn.dataset.k);
+      continue;
+    }
+    if (t.clientX < innerWidth * 0.4 && touch.stickId === null) { touch.stickId = t.identifier; touch.ox = t.clientX; touch.oy = t.clientY; placeStick(t.clientX, t.clientY); }
+    else touch.look.set(t.identifier, { x: t.clientX, y: t.clientY });
+  }
+}, { passive: false });
+tl.addEventListener('touchmove', e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    if (t.identifier === touch.stickId) {
+      let dx = t.clientX - touch.ox, dy = t.clientY - touch.oy; const d = Math.hypot(dx, dy);
+      if (d > STICK_R) { dx *= STICK_R / d; dy *= STICK_R / d; }
+      touch.move.x = dx / STICK_R; touch.move.y = -dy / STICK_R;
+      $('knob').style.transform = `translate(${dx}px, ${dy}px)`;
+    } else if (touch.look.has(t.identifier) && player && state === 'play') {
+      const prev = touch.look.get(t.identifier), k = 0.0011 * sens * (rightDown ? 0.5 : 1);
+      player.yaw -= (t.clientX - prev.x) * k; player.pitch = clamp(player.pitch - (t.clientY - prev.y) * k, -1.2, 1.2);
+      prev.x = t.clientX; prev.y = t.clientY;
+    }
+  }
+}, { passive: false });
+function touchEnd(e) {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    if (t.identifier === touch.stickId) { touch.stickId = null; touch.move.x = touch.move.y = 0; placeStick(); }
+    touch.look.delete(t.identifier);
+    if (touch.fireIds.delete(t.identifier) && !touch.fireIds.size) { mouseDown = false; clickQueued = false; }
+    if (touch.jumpIds.delete(t.identifier) && !touch.jumpIds.size) keys.Space = false;
+    const btn = t.target.closest ? t.target.closest('.tbtn') : null; if (btn) btn.classList.remove('down');
+  }
+}
+tl.addEventListener('touchend', touchEnd, { passive: false });
+tl.addEventListener('touchcancel', touchEnd, { passive: false });
+document.addEventListener('visibilitychange', () => { if (document.hidden && TOUCH) pauseGame(); });
+if (TOUCH) {
+  $('touchKeys').style.display = ''; $('deskKeys').style.display = 'none';
+  document.querySelector('#pause .small').textContent = 'Tap resume to keep playing.';
+}
+$('resumeBtn').onclick = resumeGame;
 $('againBtn').onclick = () => location.reload();
 $('playBtn').onclick = startMatch;
 // Menu: marker, helmet, difficulty, sensitivity
@@ -1152,7 +1317,8 @@ let last = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = clamp((now - last) / 1000, 0, 0.05); last = now; time += dt;
-  if (state === 'play') update(dt);
+  const sideways = !TOUCH || innerWidth > innerHeight; // on phones, hold the game while in portrait
+  if (state === 'play' && sideways) update(dt);
   else if (state === 'menu') {
     const a = time * 0.06; camera.position.set(Math.cos(a) * 70, 32, Math.sin(a) * 70); camera.lookAt(0, 0, 0);
     flag.cloth.rotation.y = Math.sin(time * 4) * 0.25;
